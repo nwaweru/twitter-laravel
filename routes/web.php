@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\User\TweetController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,10 +19,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::group(['prefix' => '{username}'], function () {
-    Route::resource('tweet', TweetController::class);
+Auth::routes(['verify' => true]);
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+    Route::group(['prefix' => '{username}'], function () {
+        Route::resource('tweet', TweetController::class);
+    });
 });
-
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
