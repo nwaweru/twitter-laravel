@@ -13,6 +13,7 @@ class VerifyEmail extends Mailable
     use Queueable, SerializesModels;
 
     public $user;
+
     public $url;
 
     /**

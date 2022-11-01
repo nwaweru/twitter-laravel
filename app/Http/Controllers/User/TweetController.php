@@ -8,6 +8,13 @@ use Illuminate\Http\Request;
 
 class TweetController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth', [
+            'only' => ['create', 'store', 'edit', 'update', 'destroy'],
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -28,15 +35,13 @@ class TweetController extends Controller
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
+        $this->validate($request, [
+            'body' => 'required|max:255',
+        ]);
+
+        return $request->user()->tweets()->create($request->only(['body']));
     }
 
     public function show($username, Tweet $tweet)

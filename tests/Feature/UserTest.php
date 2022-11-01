@@ -5,11 +5,11 @@ namespace Tests\Feature;
 use App\Mail\VerifyEmail;
 use App\Models\Tweet;
 use App\Models\User;
+use App\Notifications\UserVerifyNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
-use App\Notifications\UserVerifyNotification;
 
 class UserTest extends TestCase
 {
@@ -62,8 +62,10 @@ class UserTest extends TestCase
 
         $user = User::where('email', $email)->first();
 
-        $notification = new class extends UserVerifyNotification {
-            public function publicVerificationUrl($user) {
+        $notification = new class extends UserVerifyNotification
+        {
+            public function publicVerificationUrl($user)
+            {
                 return parent::verificationUrl($user);
             }
         };
@@ -81,5 +83,19 @@ class UserTest extends TestCase
         Mail::assertSent(VerifyEmail::class, function ($mail) use ($user) {
             return $mail->hasTo($user->email);
         });
+    }
+
+    /** @test */
+    public function a_user_can_create_a_tweet()
+    {
+        $user = User::factory()->create();
+        $tweet = 'My first tweet';
+
+        $this->actingAs($user)
+            ->post(route('tweet.store', ['username' => $user->username]), [
+                'body' => $tweet,
+            ]);
+
+        $this->assertDatabaseHas('tweets', ['body' => $tweet]);
     }
 }
